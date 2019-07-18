@@ -44,11 +44,10 @@ func waitForServerState(state string, power string, serverID string, client *gov
 	}()
 	log.Printf("Waiting for up to %d seconds for server", timeout/time.Second)
 	select {
-	case retval := <-result:
-		return retval
-	case <-time.After(timeout):
-		err := fmt.Errorf("Timeout while waiting to for server")
+	case err := <-result:
 		return err
+	case <-time.After(timeout):
+		return fmt.Errorf("Timeout while waiting to for server")
 	}
 }
 
@@ -87,10 +86,9 @@ func waitForSnapshotState(state string, snapshotID string, client *govultr.Clien
 	}()
 	log.Printf("Waiting for up to %d seconds for snapshot", timeout/time.Second)
 	select {
-	case retval := <-result:
-		return retval
-	case <-time.After(timeout):
-		err := fmt.Errorf("Timeout while waiting to for snapshot")
+	case err := <-result:
 		return err
+	case <-time.After(timeout):
+		return fmt.Errorf("Timeout while waiting to for snapshot")
 	}
 }
