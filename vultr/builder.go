@@ -2,6 +2,7 @@ package vultr
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/packer/common"
@@ -69,6 +70,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (ret 
 
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
+	}
+
+	if _, ok := state.GetOk(multistep.StateCancelled); ok {
+		return nil, errors.New("build was cancelled")
+	}
+
+	if _, ok := state.GetOk(multistep.StateHalted); ok {
+		return nil, errors.New("build was halted")
+	}
+
+	if _, ok := state.GetOk("snapshot"); !ok {
+		return nil, errors.New("cannot find snapshot in state")
 	}
 
 	snapshot := state.Get("snapshot").(*govultr.Snapshot)
