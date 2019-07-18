@@ -64,16 +64,25 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		// Default to environment variable for api_key, if it exists
 		c.APIKey = os.Getenv("VULTR_API_KEY")
 		if c.APIKey == "" {
-			errs = packer.MultiErrorAppend(errs, errors.New("Vultr api_key is required"))
+			errs = packer.MultiErrorAppend(errs, errors.New("vultr api_key is required"))
 		}
 	}
 
 	if c.Description == "" {
 		def, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to render description: %s", err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render snapshot description: %s", err))
 		} else {
 			c.Description = def
+		}
+	}
+
+	if c.Label == "" {
+		def, err := interpolate.Render("packer-{{timestamp}}", nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render label: %s", err))
+		} else {
+			c.Label = def
 		}
 	}
 
@@ -113,7 +122,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if stateTimeout, err := time.ParseDuration(c.RawStateTimeout); err == nil {
 			c.stateTimeout = stateTimeout
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to parse state timeout: %s", err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to parse state timeout: %s", err))
 		}
 	}
 
